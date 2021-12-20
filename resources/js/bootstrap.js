@@ -1,4 +1,6 @@
 window._ = require('lodash');
+import 'bootstrap';
+import '@fortawesome/fontawesome-free/js/all';
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
