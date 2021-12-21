@@ -14,5 +14,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('login');
+    return view('welcome');
 });
+
+Route::get('/line', 'App\Http\Controllers\Api\LineAuthController@pageLine');
+Route::get('/callback/login', 'App\Http\Controllers\Api\LineAuthController@lineLoginCallBack');

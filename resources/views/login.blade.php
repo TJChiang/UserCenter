@@ -29,9 +29,12 @@
             </form>
             <hr>
         </div>
-        <div class="text-center mt-4">
-            <button class="btn btn-lg btn-outline-primary"><i class="fab fa-line"></i> Line Login</button>
-        </div>
+        <form class="form-signin">
+            @csrf
+            <div class="text-center mb-4">
+                <a href="{{ $url }}"><img class="mb-4" src="{{ asset("/images/btn_login_base.png") }}"></a>
+            </div>
+        </form>
     </div>
 </div>
 @endsection
