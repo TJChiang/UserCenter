@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
 use App\Services\Auth\UserService;
 use App\Services\Auth\LineService;
 use Auth;
@@ -25,16 +24,22 @@ class LineAuthController extends Controller
     public function lineLoginCallback(Request $request)
     {
         try {
+            $session = $request->session();
+            $state = $session->get('line.state');
+            if ($state !== $request->state) {
+                throw new Exception("State Timeout!");
+            }
+
             $error = $request->input('error', false);
             if ($error) {
                 throw new Exception("request params are not valid");
             }
-
-            $cbState = Crypt::decrypt($request->state);
             $lineToken = $this->lineService->getLineToken($request->code);
             $tokenVerify = $this->lineService->verifyLineToken($lineToken['id_token']);
             $lineUserInfo = $this->lineService->verifyAccessToken($lineToken['access_token']);
-            if (isset($lineUserInfo->error)) { throw $lineUserInfo->error_description; }
+            if (isset($lineUserInfo->error)) {
+                throw new Exception($lineUserInfo->error_description);
+            }
             $userInfo = $this->userService->getUserByLineId($tokenVerify['sub']);
 
             // echo "<pre>"; print_r($cbState); echo "</pre>";
@@ -43,7 +48,7 @@ class LineAuthController extends Controller
             // echo "<pre>"; echo print_r($lineUserInfo); echo "</pre>";
             // echo "<pre>"; echo print_r($userInfo); echo "</pre>";
 
-            switch ($cbState['type']) {
+            switch (explode("-", $state)[0]) {
                 case 'register':
                     if ($userInfo) {
                         return response('This user has been Signed up.');
@@ -74,6 +79,7 @@ class LineAuthController extends Controller
                     throw new Exception("request params are not valid");
             };
         } catch (Exception $err) {
+            $session->flush();
             return response($err, 401);
         }
     }

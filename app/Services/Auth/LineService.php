@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use Crypt;
+use Illuminate\Support\Str;
 use GuzzleHttp\Client;
 
 // https://developers.line.biz/en/docs/line-login/integrate-line-login/#receiving-the-authorization-code-or-error-response-with-a-web-app
@@ -15,14 +15,18 @@ class LineService
         $this->gClient = $gClient;
     }
 
-    public function getLoginBaseUrl($type)
+    public function getLoginBaseUrl($type, $request)
     {
+        $state = $type . '-' . Str::random(32);
+
         $url = config('line.authorize_base_url') . '?';
         $url .= 'response_type=code';
         $url .= '&client_id=' . config('line.channel_id');
         $url .= '&redirect_uri=' . route('line_callback');
-        $url .= '&state=' . Crypt::encrypt(['type' => $type, 'random_time' => time()]);
+        $url .= '&state=' . $state;
         $url .= '&scope=profile%20openid';
+
+        $request->session()->put('line.state', $state);
 
         return $url;
     }

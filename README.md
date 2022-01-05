@@ -23,8 +23,12 @@
 - [Laravel with Line Login (2)](https://medium.com/@r3850355/%E7%AD%86%E8%A8%98-laravel-%E5%89%8D%E5%BE%8C%E7%AB%AF%E5%88%86%E9%9B%A2%E4%B8%8B%E7%9A%84-line-login-%E9%A9%97%E8%AD%89%E6%A9%9F%E5%88%B6-8d4bede8d47e)
 - [Hydra Setup](https://www.ory.sh/hydra/docs/5min-tutorial)
 
-- [ ] 執行環境
-- [ ] 注入 `GuzzleHttp\Client`
-- [ ] XSS state 判斷是否為有效
+## Improvement
+### 2022.01.05
+- [x] 執行環境
+- [x] 注入 `GuzzleHttp\Client`
+    > 以建構子注入
+- [x] XSS state 判斷是否為有效
+    > `state` 存入 `Session`，callback 之後取出進行驗證
 - [ ] 解決波動拳 （兩層為限）
 - [ ] Exception custom render

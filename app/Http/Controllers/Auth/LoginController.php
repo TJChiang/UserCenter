@@ -20,12 +20,12 @@ class LoginController extends Controller
         $this->hydraService = $hydraService;
     }
 
-    public function main()
+    public function main(Request $request)
     {
         if (Auth::user()) {
             return redirect()->route('default');
         }
-        $url = $this->lineService->getLoginBaseUrl('login');
+        $url = $this->lineService->getLoginBaseUrl('login', $request);
         return view('authPage', [
             'title' => 'Sign in',
             'authUrl' => $this->hydraService->getLoginBaseUrl(),
@@ -34,9 +34,9 @@ class LoginController extends Controller
         ]);
     }
 
-    public function signUp()
+    public function signUp(Request $request)
     {
-        $url = $this->lineService->getLoginBaseUrl('register');
+        $url = $this->lineService->getLoginBaseUrl('register', $request);
         return view('authPage', [
             'title' => 'Sign up',
             'authUrl' => $this->hydraService->getLoginBaseUrl(),
