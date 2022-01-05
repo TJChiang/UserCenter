@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use Illuminate\Support\Str;
+use App\Exceptions\Auth\InvalidCallbackDataException;
 use GuzzleHttp\Client;
 
 // https://developers.line.biz/en/docs/line-login/integrate-line-login/#receiving-the-authorization-code-or-error-response-with-a-web-app
@@ -74,7 +75,12 @@ class LineService
             ]
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        $res = json_decode($response->getBody()->getContents(), true);
+        if (isset($res->error)) {
+            throw new InvalidCallbackDataException("Verify Line id_token error: " . $res->error);
+        }
+
+        return $res;
     }
 
     public function verifyAccessToken($accessToken)
@@ -85,7 +91,12 @@ class LineService
             ]
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        $res = json_decode($response->getBody()->getContents(), true);
+        if (isset($res->error)) {
+            throw new InvalidCallbackDataException("Verify Line id_token error: " . $res->error);
+        }
+
+        return $res;
     }
 
     public function revokeAccessToken($accessToken)

@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Exceptions\Auth\InvalidCallbackDataException;
+use App\Exceptions\Auth\LoginException;
 use App\Services\Auth\UserService;
 use App\Services\Auth\LineService;
 use Auth;
-use Exception;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class LineAuthController extends Controller
 {
@@ -23,44 +24,36 @@ class LineAuthController extends Controller
 
     public function lineLoginCallback(Request $request)
     {
-        try {
-            $session = $request->session();
-            $state = $session->get('line.state');
-            if ($state !== $request->state) {
-                throw new Exception("State Timeout!");
-            }
-
-            $error = $request->input('error', false);
-            if ($error) {
-                throw new Exception("request params are not valid");
-            }
-            $lineToken = $this->lineService->getLineToken($request->code);
-            $tokenVerify = $this->lineService->verifyLineToken($lineToken['id_token']);
-            $lineUserInfo = $this->lineService->verifyAccessToken($lineToken['access_token']);
-            if (isset($lineUserInfo->error)) {
-                throw new Exception($lineUserInfo->error_description);
-            }
-            $userInfo = $this->userService->getUserByLineId($tokenVerify['sub']);
-
-            switch (explode("-", $state)[0]) {
-                case 'register':
-                    if ($userInfo) {
-                        return response('This user has been Signed up.');
-                    }
-
-                    $userInfo = $this->handleRegister($tokenVerify, $lineToken);
-                case 'login':
-                    if ($this->handleLogin($userInfo, $lineUserInfo['client_id'], $tokenVerify, $lineToken)) {
-                        return redirect()->route('default');
-                    }
-                    return response('Member not found', 404);
-                default:
-                    throw new Exception("request params are not valid");
-            };
-        } catch (Exception $err) {
-            $session->flush();
-            return response($err, 401);
+        $session = $request->session();
+        $state = $session->get('line.state');
+        if ($state !== $request->state) {
+            throw new InvalidCallbackDataException("Invalid State");
         }
+
+        $error = $request->input('error', false);
+        if ($error) {
+            throw new InvalidCallbackDataException('Line Login error: ' . $error);
+        }
+
+        $lineToken = $this->lineService->getLineToken($request->code);
+        $tokenVerify = $this->lineService->verifyLineToken($lineToken['id_token']);
+        $lineUserInfo = $this->lineService->verifyAccessToken($lineToken['access_token']);
+        $userInfo = $this->userService->getUserByLineId($tokenVerify['sub']);
+
+        switch (explode("-", $state)[0]) {
+            case 'register':
+                if ($userInfo) {
+                    return response('This user has been Signed up.');
+                }
+
+                $userInfo = $this->handleRegister($tokenVerify, $lineToken);
+            case 'login':
+                if ($this->handleLogin($userInfo, $lineUserInfo['client_id'], $tokenVerify, $lineToken)) {
+                    return redirect()->route('default');
+                }
+            default:
+                throw new LoginException("Login failed");
+        };
     }
 
     private function handleRegister($tokenVerify, $lineToken)
