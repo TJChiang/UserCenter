@@ -30,5 +30,5 @@
     > 以建構子注入
 - [x] XSS state 判斷是否為有效
     > `state` 存入 `Session`，callback 之後取出進行驗證
-- [ ] 解決波動拳 （兩層為限）
+- [x] 解決波動拳 （兩層為限）
 - [ ] Exception custom render

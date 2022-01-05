@@ -42,36 +42,15 @@ class LineAuthController extends Controller
             }
             $userInfo = $this->userService->getUserByLineId($tokenVerify['sub']);
 
-            // echo "<pre>"; print_r($cbState); echo "</pre>";
-            // echo "<pre>"; print_r($lineToken); echo "</pre>";
-            // echo "<pre>"; echo print_r($tokenVerify); echo "</pre>";
-            // echo "<pre>"; echo print_r($lineUserInfo); echo "</pre>";
-            // echo "<pre>"; echo print_r($userInfo); echo "</pre>";
-
             switch (explode("-", $state)[0]) {
                 case 'register':
                     if ($userInfo) {
                         return response('This user has been Signed up.');
                     }
-                    // 註冊使用者資料
-                    $userInfo = $this->userService->create([
-                        'name' => $tokenVerify['name'],
-                        'line_id' => $tokenVerify['sub'],
-                        'password' => Hash::make($tokenVerify['sub']),
-                        'token_type' => $lineToken['token_type'],
-                        'access_token' => $lineToken['access_token'],
-                        'refresh_token' => $lineToken['refresh_token']
-                    ]);
+
+                    $userInfo = $this->handleRegister($tokenVerify, $lineToken);
                 case 'login':
-                    if (
-                        $userInfo
-                        && strcmp($lineUserInfo['client_id'], config('line.channel_id')) == 0
-                        && Auth::attempt(['id' => $userInfo['id'], 'password' => $tokenVerify['sub']])
-                    ) {
-                        $this->userService->update($userInfo['id'], [
-                            'access_token' => $lineToken['access_token'],
-                            'refresh_token' => $lineToken['refresh_token']
-                        ]);
+                    if ($this->handleLogin($userInfo, $lineUserInfo['client_id'], $tokenVerify, $lineToken)) {
                         return redirect()->route('default');
                     }
                     return response('Member not found', 404);
@@ -82,5 +61,35 @@ class LineAuthController extends Controller
             $session->flush();
             return response($err, 401);
         }
+    }
+
+    private function handleRegister($tokenVerify, $lineToken)
+    {
+        return $this->userService->create([
+            'name' => $tokenVerify['name'],
+            'line_id' => $tokenVerify['sub'],
+            'password' => Hash::make($tokenVerify['sub']),
+            'token_type' => $lineToken['token_type'],
+            'access_token' => $lineToken['access_token'],
+            'refresh_token' => $lineToken['refresh_token']
+        ]);
+    }
+
+    private function handleLogin($userInfo, $clientId, $tokenVerify, $lineToken)
+    {
+        if (
+            $userInfo
+            && $clientId === config('line.channel_id')
+            && Auth::attempt(['id' => $userInfo['id'], 'password' => $tokenVerify['sub']])
+        ) {
+            $this->userService->update($userInfo['id'], [
+                'access_token' => $lineToken['access_token'],
+                'refresh_token' => $lineToken['refresh_token']
+            ]);
+
+            return true;
+        }
+
+        return false;
     }
 }
