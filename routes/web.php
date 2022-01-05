@@ -15,7 +15,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('default');
 
-Route::get('/line', 'App\Http\Controllers\Api\LineAuthController@pageLine');
-Route::get('/callback/login', 'App\Http\Controllers\Api\LineAuthController@lineLoginCallBack');
+Route::get('/login', 'App\Http\Controllers\Auth\LoginController@main')->name('login');
+Route::get('/line/login/callback', 'App\Http\Controllers\Auth\LineAuthController@lineLoginCallback')->name('line_callback');
+Route::get('/register', 'App\Http\Controllers\Auth\LoginController@signup')->name('register');
+Route::post('/logout', 'App\Http\Controllers\Auth\LoginController@destroy')->name('logout');
+
+// hydra
+Route::post('/login', 'App\Http\Controllers\Auth\LoginController@login')->name('auth_login');
+Route::post('/register', 'App\Http\Controllers\Auth\LoginController@register')->name('auth_register');
+Route::get('/login/callback', 'App\Http\Controllers\Auth\LoginController@test')->name('hydra_callback');

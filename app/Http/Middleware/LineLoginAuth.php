@@ -19,7 +19,11 @@ class LineLoginAuth
     {
         $token = $request->header('X-token');
         if (!$token) return 'Token not found';
-        $request['token_uid'] = Token::verificate($token);
+        $tokenData = Token::verify($token);
+        if (!$tokenData) {
+            return 'Token verify error';
+        }
+        $request['userId'] = $tokenData['userId'];
         return $next($request);
     }
 }

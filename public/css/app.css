@@ -17353,3 +17353,34 @@ readers do not read off random characters that represent icons */
   position: static;
   width: auto;
 }
+
+.auth-button {
+  border-color: #a8a8a8;
+  text-align: left;
+  background-color: white;
+  text-decoration: none;
+  display: inline-block;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 99em;
+  padding: 7px 16px 9px;
+  color: #292929;
+  line-height: 20px;
+  font-size: 14px;
+  font-weight: 400;
+}
+.auth-button:hover {
+  border-color: #757575;
+  color: #292929;
+  cursor: pointer;
+}
+.auth-button div {
+  align-items: center;
+  display: flex;
+}
+.auth-button div img {
+  margin-top: -2px;
+  margin-right: 8px;
+  display: block;
+  vertical-align: middle;
+}
