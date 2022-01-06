@@ -9,11 +9,11 @@ use GuzzleHttp\Client;
 // https://developers.line.biz/en/docs/line-login/integrate-line-login/#receiving-the-authorization-code-or-error-response-with-a-web-app
 class LineService
 {
-    protected $gClient;
+    protected $httpClient;
 
-    public function __construct(Client $gClient)
+    public function __construct(Client $httpClient)
     {
-        $this->gClient = $gClient;
+        $this->httpClient = $httpClient;
     }
 
     public function getLoginBaseUrl($type, $request)
@@ -34,7 +34,7 @@ class LineService
 
     public function getLineToken($code)
     {
-        $response = $this->gClient->request('POST', config('line.get_token_url'), [
+        $response = $this->httpClient->request('POST', config('line.get_token_url'), [
             'form_params' => [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
@@ -47,19 +47,13 @@ class LineService
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    // Array
-    // (
-    //     [userId] => abcd
-    //     [displayName] => Nature
-    //     [pictureUrl] => https://profile.line-scdn.net/0hWCA0iIbzCGx8SSBMou93O0AMBgELZw4kBHwVAgsZV1hXeBpvRy5GDlpOAg9VeBs8QHoVAwtAUg4F
-    // )
     public function getUserProfile($token)
     {
         $headers = [
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
         ];
-        $response = $this->gClient->request('GET', config('line.get_user_profile_url'), [
+        $response = $this->httpClient->request('GET', config('line.get_user_profile_url'), [
             'headers' => $headers
         ]);
 
@@ -68,7 +62,7 @@ class LineService
 
     public function verifyLineToken($token)
     {
-        $response = $this->gClient->request('POST', config('line.verify_token_url'), [
+        $response = $this->httpClient->request('POST', config('line.verify_token_url'), [
             'form_params' => [
                 'id_token' => $token,
                 'client_id' => config('line.channel_id')
@@ -77,7 +71,7 @@ class LineService
 
         $res = json_decode($response->getBody()->getContents(), true);
         if (isset($res->error)) {
-            throw new InvalidCallbackDataException("Verify Line id_token error: " . $res->error);
+            throw new InvalidCallbackDataException("Verify Line id_token error: " . $res->error_description);
         }
 
         return $res;
@@ -85,7 +79,7 @@ class LineService
 
     public function verifyAccessToken($accessToken)
     {
-        $response = $this->gClient->request('GET', config('line.verify_token_url'), [
+        $response = $this->httpClient->request('GET', config('line.verify_token_url'), [
             'query' => [
                 'access_token' => $accessToken
             ]
@@ -93,7 +87,7 @@ class LineService
 
         $res = json_decode($response->getBody()->getContents(), true);
         if (isset($res->error)) {
-            throw new InvalidCallbackDataException("Verify Line id_token error: " . $res->error);
+            throw new InvalidCallbackDataException("Verify Line id_token error: " . $res->error_description);
         }
 
         return $res;
@@ -101,7 +95,7 @@ class LineService
 
     public function revokeAccessToken($accessToken)
     {
-        $this->gClient->request('POST', config('line.revoke_url'), [
+        $this->httpClient->request('POST', config('line.revoke_url'), [
             'form_params' => [
                 'access_token' => $accessToken,
                 'client_id' => config('line.channel_id'),
