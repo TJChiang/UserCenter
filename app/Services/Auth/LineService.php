@@ -9,20 +9,22 @@ use GuzzleHttp\Client;
 // https://developers.line.biz/en/docs/line-login/integrate-line-login/#receiving-the-authorization-code-or-error-response-with-a-web-app
 class LineService
 {
-    protected $httpClient;
+    private $httpClient;
+    private $lineConfig;
 
     public function __construct(Client $httpClient)
     {
         $this->httpClient = $httpClient;
+        $this->lineConfig = config('line');
     }
 
     public function getLoginBaseUrl($type, $request)
     {
         $state = $type . '-' . Str::random(32);
 
-        $url = config('line.authorize_base_url') . '?';
+        $url = $this->lineConfig['authorize_base_url'] . '?';
         $url .= 'response_type=code';
-        $url .= '&client_id=' . config('line.channel_id');
+        $url .= '&client_id=' . $this->lineConfig['channel_id'];
         $url .= '&redirect_uri=' . route('line_callback');
         $url .= '&state=' . $state;
         $url .= '&scope=profile%20openid';
@@ -34,13 +36,13 @@ class LineService
 
     public function getLineToken($code)
     {
-        $response = $this->httpClient->request('POST', config('line.get_token_url'), [
+        $response = $this->httpClient->request('POST', $this->lineConfig['get_token_url'], [
             'form_params' => [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
                 'redirect_uri' => route('line_callback'),
-                'client_id' => config('line.channel_id'),
-                'client_secret' => config('line.secret')
+                'client_id' => $this->lineConfig['channel_id'],
+                'client_secret' => $this->lineConfig['secret']
             ]
         ]);
 
@@ -53,7 +55,7 @@ class LineService
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
         ];
-        $response = $this->httpClient->request('GET', config('line.get_user_profile_url'), [
+        $response = $this->httpClient->request('GET', $this->lineConfig['get_user_profile_url'], [
             'headers' => $headers
         ]);
 
@@ -62,10 +64,10 @@ class LineService
 
     public function verifyLineToken($token)
     {
-        $response = $this->httpClient->request('POST', config('line.verify_token_url'), [
+        $response = $this->httpClient->request('POST', $this->lineConfig['verify_token_url'], [
             'form_params' => [
                 'id_token' => $token,
-                'client_id' => config('line.channel_id')
+                'client_id' => $this->lineConfig['channel_id']
             ]
         ]);
 
@@ -79,7 +81,7 @@ class LineService
 
     public function verifyAccessToken($accessToken)
     {
-        $response = $this->httpClient->request('GET', config('line.verify_token_url'), [
+        $response = $this->httpClient->request('GET', $this->lineConfig['verify_token_url'], [
             'query' => [
                 'access_token' => $accessToken
             ]
@@ -95,11 +97,11 @@ class LineService
 
     public function revokeAccessToken($accessToken)
     {
-        $this->httpClient->request('POST', config('line.revoke_url'), [
+        $this->httpClient->request('POST', $this->lineConfig['revoke_url'], [
             'form_params' => [
                 'access_token' => $accessToken,
-                'client_id' => config('line.channel_id'),
-                'client_secret' => config('line.secret')
+                'client_id' => $this->lineConfig['channel_id'],
+                'client_secret' => $this->lineConfig['secret']
             ]
         ]);
     }
