@@ -6,7 +6,7 @@ participant "Line Platform" as Line order 3
 User -> App: Log in
 App -> Line: Access the Line Login authorization \nURL with `redirect_uri` and `state`
 User <- Line: Line Login screen
-User -> Line: Authorization
+User -> Line: Authentication
 User <- Line: Consent screen
 User -> Line: Authorization
 App <- Line: Access `redirect_uri` with `state` \nand authorization code
