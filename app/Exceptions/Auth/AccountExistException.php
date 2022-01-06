@@ -4,15 +4,15 @@ namespace App\Exceptions\Auth;
 
 use Exception;
 
-class LoginException extends Exception
+class AccountExistException extends Exception
 {
     public function render($request)
     {
         $request->session()->flush();
 
         return response()->json([
-            "code" => 401,
-            "message" => $this->getMessage()
-        ], 401);
+            "code" => 409,
+            "message" => "This account already exists"
+        ], 409);
     }
 }
