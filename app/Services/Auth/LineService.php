@@ -15,14 +15,14 @@ class LineService
     public function __construct(Client $httpClient)
     {
         $this->httpClient = $httpClient;
-        $this->lineConfig = config('line');
+        $this->lineConfig = config('services.line');
     }
 
     public function getLoginBaseUrl($type, $request)
     {
         $state = $type . '-' . Str::random(32);
 
-        $url = $this->lineConfig['authorize_base_url'] . '?';
+        $url = $this->lineConfig['authorize_endpoint'] . '?';
         $url .= 'response_type=code';
         $url .= '&client_id=' . $this->lineConfig['channel_id'];
         $url .= '&redirect_uri=' . route('line_callback');
@@ -36,7 +36,7 @@ class LineService
 
     public function getLineToken($code)
     {
-        $response = $this->httpClient->request('POST', $this->lineConfig['get_token_url'], [
+        $response = $this->httpClient->request('POST', $this->lineConfig['token_endpoint'], [
             'form_params' => [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
