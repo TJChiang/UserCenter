@@ -30,4 +30,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'line' => [
+        'channel_id' => env('LINE_CHANNEL_ID'),
+        'secret' => env('LINE_SECRET'),
+        'authorize_endpoint' => 'https://access.line.me/oauth2/v2.1/authorize',
+        'token_endpoint' => 'https://api.line.me/oauth2/v2.1/token',
+        'get_user_profile_url' => 'https://api.line.me/v2/profile',
+        'verify_token_url' => 'https://api.line.me/oauth2/v2.1/verify',
+        'picture_url' => 'https://profile.line-scdn.net',
+        'revoke_url' => 'https://api.line.me/oauth2/v2.1/revoke',
+        'redirect' => 'https://localhost/line/callback'
+    ],
 ];
