@@ -2,9 +2,11 @@
 
 namespace App\Services\Auth;
 
-use Illuminate\Support\Str;
 use App\Exceptions\Auth\InvalidCallbackDataException;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Session;
 
 // https://developers.line.biz/en/docs/line-login/integrate-line-login/#receiving-the-authorization-code-or-error-response-with-a-web-app
 class LineService
@@ -18,20 +20,23 @@ class LineService
         $this->lineConfig = config('services.line');
     }
 
-    public function getLoginBaseUrl($type, $request)
+    public function getAuthorizeEndpoint(): string
     {
-        $state = $type . '-' . Str::random(32);
+        $state = Str::random(32);
+        $nonce = Str::random(32);
 
-        $url = $this->lineConfig['authorize_endpoint'] . '?';
-        $url .= 'response_type=code';
-        $url .= '&client_id=' . $this->lineConfig['channel_id'];
-        $url .= '&redirect_uri=' . route('line_callback');
-        $url .= '&state=' . $state;
-        $url .= '&scope=profile%20openid';
+        $query = Arr::query([
+            'response_type' => 'code',
+            'client_id' => config('services.line.channel_id'),
+            'redirect_uri' => config('services.line.redirect'),
+            'state' => $state,
+            'nonce' => $nonce,
+            'scope' => 'profile openid email'
+        ]);
 
-        $request->session()->put('line.state', $state);
+        Session::put('line.state', $state);
 
-        return $url;
+        return config('services.line.authorize_endpoint') . '?' . $query;
     }
 
     public function getLineToken($code)

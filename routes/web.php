@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LineLoginGet;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,8 +18,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('default');
 
+// Line
 Route::get('/login', 'App\Http\Controllers\Auth\LoginController@main')->name('login');
-Route::get('/line/login/callback', 'App\Http\Controllers\Auth\LineAuthController@lineLoginCallback')->name('line_callback');
+Route::prefix('/line')->group(function () {
+    Route::get('/login', LineLoginGet::class)->name('line_login');
+    Route::get('/login/callback', 'App\Http\Controllers\Auth\LineAuthController@lineLoginCallback')->name('line_callback');
+});
 Route::get('/register', 'App\Http\Controllers\Auth\LoginController@signup')->name('register');
 Route::post('/logout', 'App\Http\Controllers\Auth\LoginController@destroy')->name('logout');
 
