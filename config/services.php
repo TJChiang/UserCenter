@@ -37,8 +37,8 @@ return [
         'verify_token_url' => 'https://api.line.me/oauth2/v2.1/verify',
         'picture_url' => 'https://profile.line-scdn.net',
         'revoke_url' => 'https://api.line.me/oauth2/v2.1/revoke',
-        'channel_id' => env('LINE_CHANNEL_ID'),
-        'secret' => env('LINE_SECRET'),
-        'redirect' => env('APP_URL') . '/line/login/callback'
+        'client_id' => env('LINE_CHANNEL_ID'),
+        'client_secret' => env('LINE_SECRET'),
+        'redirect' => env('LINE_REDIRECT')
     ],
 ];

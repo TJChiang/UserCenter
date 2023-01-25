@@ -27,7 +27,7 @@ class LineService
 
         $query = Arr::query([
             'response_type' => 'code',
-            'client_id' => config('services.line.channel_id'),
+            'client_id' => config('services.line.client_id'),
             'redirect_uri' => config('services.line.redirect'),
             'state' => $state,
             'nonce' => $nonce,
@@ -46,8 +46,8 @@ class LineService
                 'grant_type' => 'authorization_code',
                 'code' => $code,
                 'redirect_uri' => route('line_callback'),
-                'client_id' => $this->lineConfig['channel_id'],
-                'client_secret' => $this->lineConfig['secret']
+                'client_id' => $this->lineConfig['client_id'],
+                'client_secret' => $this->lineConfig['client_secret']
             ]
         ]);
 
@@ -72,7 +72,7 @@ class LineService
         $response = $this->httpClient->request('POST', $this->lineConfig['verify_token_url'], [
             'form_params' => [
                 'id_token' => $token,
-                'client_id' => $this->lineConfig['channel_id']
+                'client_id' => $this->lineConfig['client_id']
             ]
         ]);
 
@@ -105,8 +105,8 @@ class LineService
         $this->httpClient->request('POST', $this->lineConfig['revoke_url'], [
             'form_params' => [
                 'access_token' => $accessToken,
-                'client_id' => $this->lineConfig['channel_id'],
-                'client_secret' => $this->lineConfig['secret']
+                'client_id' => $this->lineConfig['client_id'],
+                'client_secret' => $this->lineConfig['client_secret']
             ]
         ]);
     }
