@@ -16,7 +16,7 @@ class LineLoginGet
         $query = Arr::query([
             'response_type' => 'code',
             'client_id' => config('services.line.channel_id'),
-            'redirect_uri' => 'https://localhost/line/callback',
+            'redirect_uri' => config('services.line.redirect'),
             'state' => $state,
             'nonce' => $nonce,
             'scope' => 'profile openid email'
