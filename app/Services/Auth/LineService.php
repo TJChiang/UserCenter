@@ -60,7 +60,7 @@ class LineService
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
         ];
-        $response = $this->httpClient->request('GET', $this->lineConfig['get_user_profile_url'], [
+        $response = $this->httpClient->request('GET', $this->lineConfig['profile_url'], [
             'headers' => $headers
         ]);
 
