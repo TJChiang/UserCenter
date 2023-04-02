@@ -36,13 +36,7 @@ class LineLoginGet
     {
         /** @var Provider $lineProvider */
         $lineProvider = Socialite::driver('line');
-
-        return $lineProvider->with([
-            // 'prompt' => 'consent'
-        ])->redirect();
+        $lineProvider->setScopes(['profile', 'openid']);
+        return $lineProvider->redirect();
     }
 }
-
-
-
-
